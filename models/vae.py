@@ -96,7 +96,7 @@ def loss_function(recon_x, x, mu, logvar):
 
     return BCE
 
-def sample_z(m, k):
+def sample_z(m, k, gpu_is_available):
     """
     m = number of samples (batch size)
     k = dimension per sample (should probably be around 100)
@@ -150,7 +150,7 @@ def save_checkpoint(gpu_is_available, images_remade, vae, num_gen, base_dir, sav
         
     # New images
 
-    Z = sample_z(num_gen, k)
+    Z = sample_z(num_gen, k, gpu_is_available)
     Y = vae.decoder(Z)
     for j in range(num_gen):
         if gpu_is_available:
@@ -232,8 +232,9 @@ def main(args):
             images = images.cuda()
 
         images_remade, mu, logvar = vae(images)
-
-        vae_loss = loss_function(images_remade, images, mu, logvar)
+        loss_function = torch.nn.BCELoss()
+        vae_loss = loss_function(images_remade, images)
+        #vae_loss = loss_function(images_remade, images, mu, logvar)
 
         if gpu_is_available:
             loss_log.append(vae_loss.data.cpu().numpy())
