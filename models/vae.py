@@ -236,7 +236,7 @@ def main(args):
         vae_loss = loss_function(images_remade, images, mu, logvar)
 
         if gpu_is_available:
-            loss_log.append(vae_loss.data.cpu()numpy())
+            loss_log.append(vae_loss.data.cpu().numpy())
             mu_log.append(mu.data.cpu().numpy())
             logvar_log.append(logvar.data.cpu().numpy())
         else:
