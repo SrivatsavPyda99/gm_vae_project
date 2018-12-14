@@ -68,7 +68,7 @@ class encoder(nn.Module):
     
 class vanilla_vae(nn.Module):
     def __init__(self, num_hidden):
-        super(vae, self).__init__()
+        super(vanilla_vae, self).__init__()
         self.encoder = encoder(num_hidden)
         self.decoder = decoder(num_hidden)
     def reparameterize(self, mu, logvar):
