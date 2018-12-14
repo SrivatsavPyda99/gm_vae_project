@@ -76,7 +76,7 @@ class vanilla_vae(nn.Module):
         # to recreate: N(0, 1) * var(e ^{0.5 * unif(0, 1)}) + unif(0, 1)
         std = torch.exp(0.5*logvar)
         eps = Variable(torch.randn(std.shape))
-        if gpu_is_available:
+        if self.gpu_is_available:
             eps=eps.cuda()
         return eps.mul(std).add_(mu)
     def forward(self, x):
