@@ -224,7 +224,7 @@ def main(args):
 
         images_remade, mu, logvar = vae(images)
 
-        #vae_loss = loss_function(images_remade, images, mu, logvar)
+        vae_loss = loss_function(images_remade, images, mu, logvar)
         
         loss_log.append(vae_loss.data.numpy())
         mu_log.append(mu.data.numpy())
