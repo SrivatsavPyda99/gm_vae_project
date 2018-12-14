@@ -107,7 +107,7 @@ def sample_z(m, k):
         out = out.cuda()
     return out
 
-def save_checkpoint(images_remade, vae, num_gen, base_dir, save_iter, loss_log, mu_log, logvar_log):
+def save_checkpoint(gpu_is_available, images_remade, vae, num_gen, base_dir, save_iter, loss_log, mu_log, logvar_log):
     """
     1. Creates a new directory corresponding to the current iteration
     2. saves discriminator and generator parameters
@@ -141,7 +141,10 @@ def save_checkpoint(images_remade, vae, num_gen, base_dir, save_iter, loss_log, 
     indices = np.random.choice(range(images_remade.shape[0]), num_gen)
     for j in range(num_gen):
         index = indices[j]
-        img = images_remade[index].data.numpy()
+        if gpu_is_available:
+            img = images_remade[index].data.cpu().numpy()
+        else:
+            img = images_remade[index].data.numpy()
         img = np.stack((img, img, img), axis=-1)
         plt.imsave(os.path.join(reconstructed_images_dir, "ckpt_{}_remade_img_{}.png".format(save_iter, j+1)), img, cmap="gray")
         
@@ -150,7 +153,10 @@ def save_checkpoint(images_remade, vae, num_gen, base_dir, save_iter, loss_log, 
     Z = sample_z(num_gen, k)
     Y = vae.decoder(Z)
     for j in range(num_gen):
-        img = Y[j].data.numpy()
+        if gpu_is_available:
+            img = Y[j].data.cpu().numpy()
+        else:
+            img = Y[j].data.numpy()
         img = np.stack((img, img, img), axis=-1)
         #img = vutils.make_grid(torch.from_numpy(img), normalize=True, scale_each=True)
         plt.imsave(os.path.join(new_images_dir, "ckpt_{}_new_img_{}.png".format(save_iter, j+1)), img, cmap="gray")
@@ -228,10 +234,15 @@ def main(args):
         images_remade, mu, logvar = vae(images)
 
         vae_loss = loss_function(images_remade, images, mu, logvar)
-        
-        loss_log.append(vae_loss.data.numpy())
-        mu_log.append(mu.data.numpy())
-        logvar_log.append(logvar.data.numpy())
+
+        if gpu_is_available:
+            loss_log.append(vae_loss.data.cpu()numpy())
+            mu_log.append(mu.data.cpu().numpy())
+            logvar_log.append(logvar.data.cpu().numpy())
+        else:
+            loss_log.append(vae_loss.data.numpy())
+            mu_log.append(mu.data.numpy())
+            logvar_log.append(logvar.data.numpy())
         
         running_value += vae_loss.data
 
@@ -270,7 +281,7 @@ def main(args):
         #    approximate_distinguishing_probs.append(approximate_distinguishing_prob(discriminator, generator, mnist_data))
         # save ocasionally and save a few sample images generated
         if (it+1) % save_interval == 0:
-            save_checkpoint(images_remade, vae, num_gen, save_dir, it+1, loss_log, mu_log, logvar_log)
+            save_checkpoint(gpu_is_available, images_remade, vae, num_gen, save_dir, it+1, loss_log, mu_log, logvar_log)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
