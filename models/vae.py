@@ -66,7 +66,7 @@ class encoder(nn.Module):
         mu = F.sigmoid(self.fc32(x))
         return mu, logvar
     
-class vae(nn.Module):
+class vanilla_vae(nn.Module):
     def __init__(self, num_hidden):
         super(vae, self).__init__()
         self.encoder = encoder(num_hidden)
@@ -185,7 +185,7 @@ def main(args):
                     sampler=torch.utils.data.sampler.SubsetRandomSampler(np.random.choice(range(len(mnist_data)), 
                                                                                         training_size)))
 
-    vae = vae(num_hidden)
+    vae = vanilla_vae(num_hidden)
     
     if gpu_is_available:
         vae = vae.cuda()
