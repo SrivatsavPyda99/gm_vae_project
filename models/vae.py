@@ -216,7 +216,7 @@ def main(args):
         logvar_log = np.load(logvar_log_ckpt).tolist()
 
     vae_optimizer = optim.Adam(vae.parameters(), lr=lr, betas=betas)
-    criterion = nn.BCELoss()
+    #criterion = nn.BCELoss()
 
 
     running_value = 0
@@ -233,7 +233,7 @@ def main(args):
 
         images_remade, mu, logvar = vae(images)
         loss_function = torch.nn.BCELoss()
-        vae_loss = loss_function(images_remade, images)
+        vae_loss = loss_function(images_remade, images.squeeze())
         #vae_loss = loss_function(images_remade, images, mu, logvar)
 
         if gpu_is_available:
