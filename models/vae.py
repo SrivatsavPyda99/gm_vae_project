@@ -67,7 +67,8 @@ class encoder(nn.Module):
         return mu, logvar
     
 class vanilla_vae(nn.Module):
-    def __init__(self, num_hidden):
+    def __init__(self, num_hidden, gpu_is_available):
+        self.gpu_is_available = gpu_is_available
         super(vanilla_vae, self).__init__()
         self.encoder = encoder(num_hidden)
         self.decoder = decoder(num_hidden)
@@ -75,6 +76,8 @@ class vanilla_vae(nn.Module):
         # to recreate: N(0, 1) * var(e ^{0.5 * unif(0, 1)}) + unif(0, 1)
         std = torch.exp(0.5*logvar)
         eps = Variable(torch.randn(std.shape))
+        if gpu_is_available:
+            eps=eps.cuda()
         return eps.mul(std).add_(mu)
     def forward(self, x):
         mu, logvar = self.encoder(x)
@@ -185,7 +188,7 @@ def main(args):
                     sampler=torch.utils.data.sampler.SubsetRandomSampler(np.random.choice(range(len(mnist_data)), 
                                                                                         training_size)))
 
-    vae = vanilla_vae(num_hidden)
+    vae = vanilla_vae(num_hidden, gpu_is_available)
     
     if gpu_is_available:
         vae = vae.cuda()
