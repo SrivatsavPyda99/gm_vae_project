@@ -133,9 +133,9 @@ def save_checkpoint(gpu_is_available, images_remade, vae, num_gen, base_dir, sav
     # Stuff to save in base directory
     
     torch.save(vae.state_dict(), vae_ckpt)
-    np.save(os.path.join(base_dir, "loss_log.npy"), loss_log)
-    np.save(os.path.join(base_dir, "mu_log.npy"), mu_log)
-    np.save(os.path.join(base_dir, "logvar_log.npy"), logvar_log)
+    #np.save(os.path.join(base_dir, "loss_log.npy"), loss_log)
+    #np.save(os.path.join(base_dir, "mu_log.npy"), mu_log)
+    #np.save(os.path.join(base_dir, "logvar_log.npy"), logvar_log)
     
     # Reconstructed images
     indices = np.random.choice(range(images_remade.shape[0]), num_gen)
@@ -207,9 +207,9 @@ def main(args):
     if checkpoint > 0:
         direct = os.path.join(save_dir, "checkpoint_{}".format(checkpoint))
         vae_ckpt = os.path.join(direct, "vae_ckpt_{}.pkl".format(checkpoint))
-        loss_log_ckpt = os.path.join(direct, "loss_log.npy")
-        mu_log_ckpt = os.path.join(direct, "mu_log.npy")
-        logvar_log_ckpt = os.path.join(direct, "logvar_log.npy")
+        #loss_log_ckpt = os.path.join(direct, "loss_log.npy")
+        #mu_log_ckpt = os.path.join(direct, "mu_log.npy")
+        #logvar_log_ckpt = os.path.join(direct, "logvar_log.npy")
         vae.load_state_dict(torch.load(vae_ckpt))
         loss_log = np.load(loss_log_ckpt).tolist()
         mu_log = np.load(mu_log_ckpt).tolist()
