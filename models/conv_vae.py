@@ -61,57 +61,85 @@ class decoder(nn.Module):
         x = self.bn2(F.relu(self.conv2(x)))
         x = self.bn3(F.relu(self.conv3(x)))
         x = self.bn4(F.relu(self.conv4(x)))
-        x = self.conv5(x)
+        x = F.sigmoid(self.conv5(x))
         return x
 
 class VAE(nn.Module):
 
-  def __init__(self, num_hidden, latent_dim, gpu_is_available):
-    super(VAE, self).__init__()
+    def __init__(self, num_hidden, latent_dim, gpu_is_available):
+        super(VAE, self).__init__()
 
-    self.latent_dim = latent_dim
-    self.gpu_is_available = gpu_is_available
-    self.decoder = decoder(layer_multiplier=num_hidden, latent_dim=latent_dim)
-    self.encoder = encoder(layer_multiplier=num_hidden, latent_dim=latent_dim)
+        self.latent_dim = latent_dim
+        self.gpu_is_available = gpu_is_available
+        self.decoder = decoder(layer_multiplier=num_hidden, latent_dim=latent_dim)
+        self.encoder = encoder(layer_multiplier=num_hidden, latent_dim=latent_dim)
 
-  def sample(self, mu, logvar):
-    eps = Variable(torch.randn(mu.size()))
-    if self.gpu_is_available:
-        eps = eps.cuda()
+    def sample(self, mu, logvar):
+        eps = Variable(torch.randn(mu.size()))
+        if self.gpu_is_available:
+            eps = eps.cuda()
 
-    z = eps.mul(logvar.mul(0.5).exp_()).add_(mu)
-    logqz = utils.log_normal(z, mu, logvar)
+        z = eps.mul(logvar.mul(0.5).exp_()).add_(mu)
+        logqz = utils.log_normal(z, mu, logvar)
 
-    zeros = Variable(torch.zeros(z.size()))
-    if self.gpu_is_available:
-        zeros = zeros.cuda()
+        zeros = Variable(torch.zeros(z.size()))
+        if self.gpu_is_available:
+            zeros = zeros.cuda()
 
-    logpz = utils.log_normal(z, zeros, zeros)
+        logpz = utils.log_normal(z, zeros, zeros)
 
-    return z, logpz, logqz
+        return z, logpz, logqz
 
-  def forward(self, x, k=1, warmup_const=1.):
-    #x = x.repeat(k, 1)
-    mu, logvar = self.encoder(x)
-    z, logpz, logqz = self.sample(mu, logvar)
-    x_logits = self.decoder(z)
+    def reparameterize(self, mu, logvar):
+        # to recreate: N(0, 1) * var(e ^{0.5 * unif(0, 1)}) + unif(0, 1)
+        std = torch.exp(0.5*logvar)
+        eps = Variable(torch.randn(std.shape))
+        if self.gpu_is_available:
+            eps=eps.cuda()
+        return eps.mul(std).add_(mu)
 
-    logpx = utils.log_bernoulli(x_logits.view(-1, flat_img_size), 
-                                x.squeeze().view(-1, flat_img_size))
+    # Reconstruction + KL divergence losses summed over all elements and batch
+    def loss_function(self, recon_x, x, mu, logvar):
+        # print(recon_x.size(), x.size())
+        BCE = F.binary_cross_entropy(recon_x.view(-1, 784), x.view(-1, 784), size_average=False)
+        # see Appendix B from VAE paper:
+        # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
+        # https://arxiv.org/abs/1312.6114
+        # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        # return BCE + KLD
+        return BCE + 3 * KLD
 
-    logpx = torch.mean(logpx)
-    logpz = torch.mean(logpz)
-    logqz = torch.mean(logqz)
+    def forward(self, x):
+        mu, logvar = self.encoder(x)
+        z = self.reparameterize(mu, logvar)
+        z = self.decoder(z)
+        loss = self.loss_function(z, x, mu, logvar)
+        return z, loss
+    '''
+    def forward(self, x, k=1, warmup_const=1.):
+        #x = x.repeat(k, 1)
+        mu, logvar = self.encoder(x)
+        z, logpz, logqz = self.sample(mu, logvar)
+        x_logits = self.decoder(z)
+
+        logpx = utils.log_bernoulli(x_logits.view(-1, flat_img_size), 
+                                    x.squeeze().view(-1, flat_img_size))
+
+        logpx = torch.mean(logpx)
+        logpz = torch.mean(logpz)
+        logqz = torch.mean(logqz)
 
 
-    elbo = logpx + logpz - warmup_const * logqz
+        elbo = logpx + logpz - warmup_const * logqz
 
-    # need correction for Tensor.repeat
-    #elbo = utils.log_mean_exp(elbo.view(k, -1).transpose(0, 1))
-    #elbo = torch.mean(elbo)
+        # need correction for Tensor.repeat
+        #elbo = utils.log_mean_exp(elbo.view(k, -1).transpose(0, 1))
+        #elbo = torch.mean(elbo)
 
-    #logpx = torch.mean(logpx)
-    #logpz = torch.mean(logpz)
-    #logqz = torch.mean(logqz)
+        #logpx = torch.mean(logpx)
+        #logpz = torch.mean(logpz)
+        #logqz = torch.mean(logqz)
 
-    return elbo, logpx, logpz, logqz, x_logits
+        return elbo, logpx, logpz, logqz, x_logits
+    '''
