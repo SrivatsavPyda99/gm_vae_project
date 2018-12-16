@@ -13,12 +13,12 @@ from torch.autograd import Variable
 mnist_dim = 28
 flat_img_size = mnist_dim*mnist_dim
 k = 100 # size of input to generator
-batch_size = 32
+batch_size = 128
 max_iterations = 1000000
 lr = 0.0002
 betas = (0.5, 0.999)
 print_interval = 100
-save_interval = 100000
+save_interval = 10000
 probability_interval=100
 num_hidden= 256
 root = "~/Data/MNIST"
@@ -133,9 +133,9 @@ def save_checkpoint(gpu_is_available, images_remade, vae, num_gen, base_dir, sav
     # Stuff to save in base directory
     
     torch.save(vae.state_dict(), vae_ckpt)
-    #np.save(os.path.join(base_dir, "loss_log.npy"), loss_log)
-    #np.save(os.path.join(base_dir, "mu_log.npy"), mu_log)
-    #np.save(os.path.join(base_dir, "logvar_log.npy"), logvar_log)
+    np.save(os.path.join(base_dir, "loss_log.npy"), loss_log)
+    np.save(os.path.join(base_dir, "mu_log.npy"), mu_log)
+    np.save(os.path.join(base_dir, "logvar_log.npy"), logvar_log)
     
     # Reconstructed images
     indices = np.random.choice(range(images_remade.shape[0]), num_gen)
@@ -285,6 +285,9 @@ def main(args):
         # save ocasionally and save a few sample images generated
         if (it+1) % save_interval == 0:
             save_checkpoint(gpu_is_available, images_remade, vae, num_gen, save_dir, it+1, loss_log, mu_log, logvar_log)
+            loss_log = []
+            mu_log = []
+            logvar_log = []
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
