@@ -179,8 +179,8 @@ def main(args):
 
         elbo, logpx, logpz, logqz, images_remade = vae(images)
 
-        print(logpx.max())
-        print(logpx.min())
+        #print(logpx.max())
+        #print(logpx.min())
         #print(logpx)
         
         #print(elbo.data)
