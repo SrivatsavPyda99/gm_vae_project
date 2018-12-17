@@ -61,10 +61,10 @@ def main(args):
         print(label[0])
         if(gpu_is_available):
             total_measures[label[0],:] += z.data.cpu().squeeze()
-            list_i[label[0]].append(z.data.cpu().squeeze().numpy())
+            z_measures[label[0]].append(z.data.cpu().squeeze().numpy())
         else:
             total_measures[label[0],:] += z.data.squeeze()
-            list_i[label[0]].append(z.data.squeeze().numpy())
+            z_measures[label[0]].append(z.data.squeeze().numpy())
 
     np.save(os.path.join(base_dir, "total_measures.npy"), total_measures)
     np.save(os.path.join(base_dir, "z_measures.npy"), z_measures)
