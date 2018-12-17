@@ -53,7 +53,7 @@ def main(args):
     Z = np.zeros((myrange, latent_dim))
     labels = np.zeros(myrange)
 
-    for i in range(myrange/batch_size):
+    for i in range(int(myrange/batch_size)):
         images, labels = next(iter(mnist_loader)) # get some examples (ignore labels)
 
 
