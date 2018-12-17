@@ -74,7 +74,7 @@ def main(args):
 
     np.save("../tests/image_data.npy", X)
     np.save("../tests/z_codes.npy", Z)
-    np.szve("../tests/labels.npy", labels)
+    np.save("../tests/labels.npy", labels)
 
     print("shape of X: {}".format(X.shape))
     print("shape of Z: {}".format(Z.shape))
