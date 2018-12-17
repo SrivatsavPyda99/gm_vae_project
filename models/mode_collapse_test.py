@@ -51,9 +51,9 @@ def main(args):
         list_i = []
         z_measures.append(list_i)
 
-    for i in range(len(mnist_data)):
+    for i in range(10):
         image, label = next(iter(mnist_loader)) # get some examples (ignore labels)
-        image = Variable(images)
+        image = Variable(image)
         mu, logvar = vae.encoder(image)
         z = vae.reparameterize(mu, logvar)
 
