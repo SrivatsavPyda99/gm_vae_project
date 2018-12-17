@@ -54,17 +54,17 @@ def main(args):
     labels = np.zeros(myrange)
 
     for i in range(int(myrange/batch_size)):
-        images, labels = next(iter(mnist_loader)) # get some examples (ignore labels)
+        images, label = next(iter(mnist_loader)) # get some examples (ignore labels)
 
 
         X[i * batch_size: (i +1) * batch_size,:] = images.view(-1, flattened_dim).numpy().squeeze()
-        labels[i * batch_size: (i +1) * batch_size] = labels
+        labels[i * batch_size: (i +1) * batch_size] = label
 
-        image = Variable(image)
+        images = Variable(images)
         if gpu_is_available:
-            image = image.cuda()
+            images = images.cuda()
 
-        mu, logvar = vae.encoder(image)
+        mu, logvar = vae.encoder(images)
         z = vae.reparameterize(mu, logvar)
 
         if(gpu_is_available):
