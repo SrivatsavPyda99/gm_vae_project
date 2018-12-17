@@ -9,7 +9,6 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 from torch.autograd import Variable
-import utils
 import conv_vae
 
 num_hidden= 64
