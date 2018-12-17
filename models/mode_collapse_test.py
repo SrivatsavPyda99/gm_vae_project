@@ -15,6 +15,7 @@ import conv_vae
 
 num_hidden= 64
 latent_dim = 100
+root = "~/Data/MNIST"
 
 def main(args):
     
@@ -24,7 +25,6 @@ def main(args):
         gpu_is_available = True
     checkpoint_path = "../checkpoints/conv_vae_{}/checkpoint_{}/vae_ckpt_{}.pkl".format(num_hidden, checkpoint, checkpoint)
         
-
         
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
     mnist_data = torchvision.datasets.MNIST(root, transform=transform, download=True)
