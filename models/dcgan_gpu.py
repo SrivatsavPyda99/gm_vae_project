@@ -156,7 +156,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     gen_lr = 0.0002
     betas = (0.5, 0.999)
     print_interval = 100
-    save_interval = 100000
+    save_interval = 100
     probability_interval=100
     root = "~/Data/MNIST"
     save_dir = "../checkpoints/dc_gen_{}_disc_{}".format(num_hidden_gen,num_hidden_disc)
@@ -273,6 +273,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
             if len(R[indices]) > 0:
                 n = Variable(torch.zeros(R.shape))
                 n[indices==1] = 1e-8
+                n = n.cuda()
                 R = R + n
             
             gen_loss = -torch.log(R).mean()
