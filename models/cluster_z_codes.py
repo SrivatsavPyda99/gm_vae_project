@@ -20,12 +20,12 @@ root = "~/Data/MNIST"
 training_size = 60000
 mnist_dim = 28
 flattened_dim = 28 * 28
-myrange = 1000
+myrange = 1024
 
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 mnist_data = torchvision.datasets.MNIST(root, transform=transform, download=True)
 mnist_loader = torch.utils.data.DataLoader(mnist_data, 
-                batch_size=1, 
+                batch_size=128, 
                 sampler=torch.utils.data.sampler.SubsetRandomSampler(np.random.choice(range(len(mnist_data)), len(mnist_data))))
 
 def main(args):
@@ -52,13 +52,12 @@ def main(args):
     Z = np.zeros((myrange, latent_dim))
     labels = np.zeros(myrange)
 
-    for i in range(myrange):
-        image, label = next(iter(mnist_loader)) # get some examples (ignore labels)
+    for i in range(myrange/batch_size):
+        images, labels = next(iter(mnist_loader)) # get some examples (ignore labels)
 
-        image = image[0]
-        label = label[0]
-        X[i,:] = image.view(-1, flattened_dim).numpy().squeeze()
-        labels[i] = label
+
+        X[i,:] = images.view(-1, flattened_dim).numpy().squeeze()
+        labels[i] = labels.numpy()
 
         image = Variable(image)
         if gpu_is_available:
@@ -68,9 +67,9 @@ def main(args):
         z = vae.reparameterize(mu, logvar)
 
         if(gpu_is_available):
-            Z[i,:] = z.data.cpu().squeeze()
+            Z[i * batch_size: (i +1) * batch_size,:] = z.data.cpu().numpy().squeeze()
         else:
-            Z[i,:] = z.data.squeeze()
+            Z[i * batch_size:(i +1) * batch_size,:] = z.data.numpy().squeeze()
 
     np.save("../tests/image_data.npy", X)
     np.save("../tests/z_codes.npy", Z)
