@@ -16,6 +16,7 @@ import conv_vae
 num_hidden= 64
 latent_dim = 100
 root = "~/Data/MNIST"
+training_size = 60000
 
 def main(args):
     
