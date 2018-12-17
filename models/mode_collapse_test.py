@@ -9,11 +9,6 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 from torch.autograd import Variable
-
-import sys
-sys.path.append('/Users/srivatsavpyda/Desktop/gm_vae_project/models')
-print(sys.path)
-
 import conv_vae
 
 
@@ -29,8 +24,7 @@ def main(args):
         gpu_is_available = True
     checkpoint_path = "../checkpoints/conv_vae_{}/checkpoint_{}/vae_ckpt_{}.pkl".format(num_hidden, checkpoint, checkpoint)
         
-    if not os.path.exists(save_dir):
-        os.mkdir(save_dir)
+
         
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
     mnist_data = torchvision.datasets.MNIST(root, transform=transform, download=True)
