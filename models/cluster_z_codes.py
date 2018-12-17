@@ -13,7 +13,10 @@ import matplotlib.pyplot as plt
 import argparse
 from torch.autograd import Variable
 
+num_hidden= 64
+latent_dim = 100
 root = "~/Data/MNIST"
+training_size = 60000
 mnist_dim = 28
 flattened_dim = 28 * 28
 myrange = 1000
