@@ -16,67 +16,50 @@ from torch.autograd import Variable
 
 #torch.set_default_tensor_type('torch.DoubleTensor')
 
-
 mnist_dim = 28
 flat_img_size = mnist_dim*mnist_dim
 k = 100 # size of input to generator
 #batch_size = 32
-mm=0.8
-slope_leaky_relu = 0.2
 
 
 
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
-        m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
-        m.weight.data.normal_(1.0, 0.02)
-        m.bias.data.fill_(0)
 
 class Disciminator(nn.Module):
-    def __init__(self, layer_multiplier):
+    def __init__(self, num_hidden):
         super(Disciminator, self).__init__()
-        self.conv1 = nn.Conv2d(1, layer_multiplier, 13, 1, 0, bias=False)
-        self.bn1 = nn.BatchNorm2d(layer_multiplier, momentum=mm)
-        self.conv2 = nn.Conv2d(layer_multiplier, layer_multiplier * 2, 9, 1, 0, bias=False)
-        self.bn2 = nn.BatchNorm2d(layer_multiplier*2, momentum=mm)
-        self.conv3 = nn.Conv2d(layer_multiplier*2, layer_multiplier * 4, 5, 1, 0, bias=False)
-        self.bn3 = nn.BatchNorm2d(layer_multiplier*4, momentum=mm)
-        self.conv4 = nn.Conv2d(layer_multiplier*4, layer_multiplier * 8, 3, 1, 0, bias=False)
-        self.bn4 = nn.BatchNorm2d(layer_multiplier*8, momentum=mm)
-        self.conv5 = nn.Conv2d(layer_multiplier*8, 1, 2, 1, 0, bias=False)
+        self.flat_img_size = flat_img_size
+        self.fc1 = nn.Linear(flat_img_size, 2*num_hidden)
+        self.fc2 = nn.Linear(2*num_hidden, num_hidden)
+        self.fc3 = nn.Linear(num_hidden, 1)
 
     def forward(self, x):
         """
         Assumes x is an image
         """
-        x = self.bn1(F.leaky_relu(self.conv1(x), slope_leaky_relu))
-        x = self.bn2(F.leaky_relu(self.conv2(x), slope_leaky_relu))
-        x = self.bn3(F.leaky_relu(self.conv3(x), slope_leaky_relu))
-        x = self.bn4(F.leaky_relu(self.conv4(x), slope_leaky_relu))
-        x = F.sigmoid(self.conv5(x))
+        x = x.view(-1, self.flat_img_size)
+        x = F.leaky_relu(self.fc1(x), 0.2)
+        x = F.leaky_relu(self.fc2(x), 0.2)
+        x = torch.sigmoid(self.fc3(x))
         return x
 
 class Generator(nn.Module):
-    def __init__(self, layer_multiplier):
+    def __init__(self, num_hidden):
         super(Generator, self).__init__()
-        self.conv1 = nn.ConvTranspose2d(k, layer_multiplier * 8, 2, 1, 0, bias=False)
-        self.bn1 = nn.BatchNorm2d(layer_multiplier * 8, momentum=0.8)
-        self.conv2 = nn.ConvTranspose2d(layer_multiplier * 8, layer_multiplier * 4, 3, 1, 0, bias=False)
-        self.bn2 = nn.BatchNorm2d(layer_multiplier * 4, momentum=0.8)
-        self.conv3 = nn.ConvTranspose2d(layer_multiplier * 4, layer_multiplier * 2, 5, 1, 0, bias=False)
-        self.bn3 = nn.BatchNorm2d(layer_multiplier * 2, momentum=0.8)
-        self.conv4 = nn.ConvTranspose2d(layer_multiplier * 2, layer_multiplier, 9, 1, 0, bias=False)
-        self.bn4 = nn.BatchNorm2d(layer_multiplier, momentum=0.8)
-        self.conv5 = nn.ConvTranspose2d(layer_multiplier, 1, 13, 1, 0, bias=False)
+        self.mnist_dim = mnist_dim
+        self.fc1 = nn.Linear(k, num_hidden)
+        self.bn1 = nn.BatchNorm1d(num_hidden, momentum=0.8)
+        self.fc2 = nn.Linear(num_hidden, 2*num_hidden)
+        self.bn2 = nn.BatchNorm1d(2*num_hidden, momentum=0.8)
+        self.fc3 = nn.Linear(2*num_hidden, 4*num_hidden)
+        self.bn3 = nn.BatchNorm1d(4*num_hidden, momentum=0.8)
+        self.fc4 = nn.Linear(4*num_hidden, flat_img_size)
 
     def forward(self, x):
-        x = self.bn1(F.relu(self.conv1(x)))
-        x = self.bn2(F.relu(self.conv2(x)))
-        x = self.bn3(F.relu(self.conv3(x)))
-        x = self.bn4(F.relu(self.conv4(x)))
-        x = F.tanh(self.conv5(x))
+        x = self.bn1(F.leaky_relu(self.fc1(x), 0.2))
+        x = self.bn2(F.leaky_relu(self.fc2(x), 0.2))
+        x = self.bn3(F.leaky_relu(self.fc3(x), 0.2))
+        x = torch.tanh(self.fc4(x))
+        x = x.view(-1, self.mnist_dim, self.mnist_dim)
         return x
 
 def sample_z(m, k):
@@ -85,7 +68,7 @@ def sample_z(m, k):
     k = dimension per sample (should probably be around 100)
     returns a numpy array of size m*k of (gaussian) noise to be input to the generator
     """
-    return torch.randn(m, k, 1, 1).cuda()
+    return torch.Tensor(np.random.normal(size=(m, k))).cuda()
 
 def approximate_distinguishing_prob(discriminator, generator, mnist_data, num_samples=1000):
     temp_loader = torch.utils.data.DataLoader(mnist_data, 
@@ -124,7 +107,7 @@ def save_checkpoint(discriminator, generator, num_samples, base_dir, save_iter, 
     Z = Variable(sample_z(num_samples, k)).cuda()
     Y = generator(Z).detach()
     for j in range(num_samples):
-        img = Y[j].data.cpu().numpy().squeeze()
+        img = Y[j].data.cpu().numpy()
         img = np.stack((img, img, img), axis=-1)
         #img = vutils.make_grid(torch.from_numpy(img), normalize=True, scale_each=True)
         plt.imsave(os.path.join(direct, "ckpt_{}_img_{}.png".format(save_iter, j+1)), img, cmap="gray")
@@ -158,10 +141,10 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     gen_lr = 0.0002
     betas = (0.5, 0.999)
     print_interval = 100
-    save_interval = 10000
+    save_interval = 1000
     probability_interval=100
     root = "~/Data/MNIST"
-    save_dir = "../checkpoints/dc_gen_{}_disc_{}".format(num_hidden_gen,num_hidden_disc)
+    save_dir = "../checkpoints/gen_{}_disc_{}".format(num_hidden_gen,num_hidden_disc)
     num_gen = 10 # number of samples to generate at save intervals
     gen_steps = 1  # number of generator updates per discriminator update
 
@@ -169,7 +152,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
 
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
     mnist_data = torchvision.datasets.MNIST(root, transform=transform, download=True)
     mnist_loader = torch.utils.data.DataLoader(mnist_data, 
                     batch_size=batch_size, 
@@ -178,11 +161,6 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
 
     generator = Generator(num_hidden_gen).cuda()
     discriminator = Disciminator(num_hidden_disc).cuda()
-
-    generator.apply(weights_init)
-    discriminator.apply(weights_init)
-
-
 
     objective_values = []
     discrim_grad_norms = []
@@ -193,6 +171,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     avg_fake_probs = []
     avg_real_probs = []
     approximate_distinguishing_probs = []
+
     
     # Load checkpoint if given
     if checkpoint > 0:
@@ -207,7 +186,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     gen_optimizer = optim.Adam(generator.parameters(), lr=gen_lr, betas=betas)
 
     
-    
+
 
     running_value = 0
 
@@ -250,7 +229,6 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
             avg_fake_prob = y_probs.data.mean()
             avg_real_prob = x_probs.data.mean()
 
-
             real_accuracies.append(real_accuracy)
             fake_accuracies.append(fake_accuracy)
             avg_accuracies.append(avg_accuracy)
@@ -275,8 +253,9 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
             indices = R==0
             indices = indices.data
             if len(R[indices]) > 0:
+                m = torch.min(R[indices==0])
                 n = Variable(torch.zeros(R.shape))
-                n[indices==1] = 1e-8
+                n[indices==1] = m.data[0]
                 R = R + n
             
             gen_loss = -torch.log(R).mean()
@@ -287,10 +266,13 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
 
             if (it+1) % print_interval == 0:
                 gen_grad_norm = torch.sqrt(torch.sum(torch.Tensor([torch.norm(x.grad.data)**2 for x in generator.parameters()])))
+                #gen_grad_norm = np.sqrt(np.sum([np.linalg.norm(x.grad.data)**2 for x in generator.parameters()]))
                 gen_grad_norms.append(gen_grad_norm)
                 print("generator gradient squared norm: {}".format(gen_grad_norm))
+
         if (it+1) % probability_interval == 0:
             approximate_distinguishing_probs.append(approximate_distinguishing_prob(discriminator, generator, mnist_data))
+
         # save ocasionally and save a few sample images generated
         if (it+1) % save_interval == 0:
             save_checkpoint(discriminator, generator, num_gen, save_dir, it+1, objective_values, discrim_grad_norms,
@@ -299,8 +281,8 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", "-c", type=int, default=0)
-    parser.add_argument("--gen_capacity", "-g", type=int, default=64)
-    parser.add_argument("--disc_capacity", "-d", type=int, default=64)
+    parser.add_argument("--gen_capacity", "-g", type=int, default=256)
+    parser.add_argument("--disc_capacity", "-d", type=int, default=256)
     parser.add_argument("--training_size", "-ts", type=int, default=60000)
     parser.add_argument("--batch_size", "-bs", type=int, default=32)
     args = parser.parse_args()

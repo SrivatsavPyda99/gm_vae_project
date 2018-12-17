@@ -177,7 +177,8 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     generator = Generator(num_hidden_gen).cuda()
     discriminator = Disciminator(num_hidden_disc).cuda()
 
-
+    generator.apply(weights_init)
+    discriminator.apply(weights_init)
 
     objective_values = []
     #discrim_grad_norms = []
