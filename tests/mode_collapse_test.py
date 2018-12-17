@@ -11,7 +11,7 @@ import argparse
 from torch.autograd import Variable
 
 import sys
-sys.path.insert(0, '/Users/srivatsavpyda/Desktop/gm_vae_project/models')
+sys.path.append('/Users/srivatsavpyda/Desktop/gm_vae_project/models')
 print(sys.path)
 
 import conv_vae
