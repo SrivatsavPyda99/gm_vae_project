@@ -238,6 +238,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", "-c", type=int, default=0)
     parser.add_argument("--gpu", "-g", type=int, default=0)
-    parser.add_argument("--save_interval", "s", type=int, default=10000)
+    parser.add_argument("--save_interval", "-s", type=int, default=10000)
     args = parser.parse_args()
     main(args)
