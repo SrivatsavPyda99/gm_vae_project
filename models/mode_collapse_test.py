@@ -54,6 +54,8 @@ def main(args):
     for i in range(10):
         image, label = next(iter(mnist_loader)) # get some examples (ignore labels)
         image = Variable(image)
+        if gpu_is_available:
+            image = image.cuda()
         mu, logvar = vae.encoder(image)
         z = vae.reparameterize(mu, logvar)
 
