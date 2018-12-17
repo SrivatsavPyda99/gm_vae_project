@@ -21,11 +21,12 @@ training_size = 60000
 mnist_dim = 28
 flattened_dim = 28 * 28
 myrange = 1024
+batch_size = 128
 
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 mnist_data = torchvision.datasets.MNIST(root, transform=transform, download=True)
 mnist_loader = torch.utils.data.DataLoader(mnist_data, 
-                batch_size=128, 
+                batch_size=batch_size, 
                 sampler=torch.utils.data.sampler.SubsetRandomSampler(np.random.choice(range(len(mnist_data)), len(mnist_data))))
 
 def main(args):
