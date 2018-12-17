@@ -57,8 +57,8 @@ def main(args):
         images, labels = next(iter(mnist_loader)) # get some examples (ignore labels)
 
 
-        X[i,:] = images.view(-1, flattened_dim).numpy().squeeze()
-        labels[i] = labels.numpy()
+        X[i * batch_size: (i +1) * batch_size,:] = images.view(-1, flattened_dim).numpy().squeeze()
+        labels[i * batch_size: (i +1) * batch_size] = labels.numpy()
 
         image = Variable(image)
         if gpu_is_available:
