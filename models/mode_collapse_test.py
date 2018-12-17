@@ -58,7 +58,7 @@ def main(args):
             image = image.cuda()
         mu, logvar = vae.encoder(image)
         z = vae.reparameterize(mu, logvar)
-
+        print(label[0])
         if(gpu_is_available):
             total_measures[label[0],:] += z.data.cpu().squeeze()
             list_i[label[0]].append(z.data.cpu().squeeze().numpy())
