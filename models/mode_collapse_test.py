@@ -60,10 +60,10 @@ def main(args):
         z = vae.reparameterize(mu, logvar)
 
         if(gpu_is_available):
-            total_measures[label[0],:] += z.data.cpu().squeeze().numpy()
+            total_measures[label[0],:] += z.data.cpu().squeeze()
             list_i[label[0]].append(z.data.cpu().squeeze().numpy())
         else:
-            total_measures[label[0],:] += z.data.squeeze().numpy()
+            total_measures[label[0],:] += z.data.squeeze()
             list_i[label[0]].append(z.data.squeeze().numpy())
 
     np.save(os.path.join(base_dir, "total_measures.npy"), total_measures)
