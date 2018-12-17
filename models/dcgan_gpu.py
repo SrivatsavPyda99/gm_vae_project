@@ -283,7 +283,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
 
             if (it+1) % print_interval == 0:
                 gen_grad_norm = torch.sqrt(torch.sum(torch.Tensor([torch.norm(x.grad.data)**2 for x in generator.parameters()])))
-                gen_grad_norms.append(gen_grad_norm)
+                #gen_grad_norms.append(gen_grad_norm)
                 print("generator gradient squared norm: {}".format(gen_grad_norm))
         #if (it+1) % probability_interval == 0:
         #    approximate_distinguishing_probs.append(approximate_distinguishing_prob(discriminator, generator, mnist_data))
