@@ -156,7 +156,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     gen_lr = 0.0002
     betas = (0.5, 0.999)
     print_interval = 100
-    save_interval = 100000
+    save_interval = 10000
     probability_interval=100
     root = "~/Data/MNIST"
     save_dir = "../checkpoints/dc_gen_{}_disc_{}".format(num_hidden_gen,num_hidden_disc)
@@ -298,6 +298,6 @@ if __name__ == "__main__":
     parser.add_argument("--gen_capacity", "-g", type=int, default=64)
     parser.add_argument("--disc_capacity", "-d", type=int, default=64)
     parser.add_argument("--training_size", "-ts", type=int, default=60000)
-    parser.add_argument("--batch_size", "-bs", type=int, default=32)
+    parser.add_argument("--batch_size", "-bs", type=int, default=128)
     args = parser.parse_args()
     main(args.checkpoint, args.gen_capacity, args.disc_capacity, args.training_size, args.batch_size)
