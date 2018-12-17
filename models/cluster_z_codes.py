@@ -12,6 +12,7 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 from torch.autograd import Variable
+import conv_vae
 
 num_hidden= 64
 latent_dim = 100
