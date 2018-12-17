@@ -55,7 +55,7 @@ class Disciminator(nn.Module):
         x = self.bn2(F.leaky_relu(self.conv2(x), slope_leaky_relu))
         x = self.bn3(F.leaky_relu(self.conv3(x), slope_leaky_relu))
         x = self.bn4(F.leaky_relu(self.conv4(x), slope_leaky_relu))
-        x = F.sigmoid(self.conv5(x))
+        x = torch.sigmoid(self.conv5(x))
         return x
 
 class Generator(nn.Module):
@@ -76,7 +76,7 @@ class Generator(nn.Module):
         x = self.bn2(F.relu(self.conv2(x)))
         x = self.bn3(F.relu(self.conv3(x)))
         x = self.bn4(F.relu(self.conv4(x)))
-        x = F.tanh(self.conv5(x))
+        x = torch.tanh(self.conv5(x))
         return x
 
 def sample_z(m, k):
