@@ -154,7 +154,7 @@ def main(args):
         #logvar_log_ckpt = os.path.join(direct, "logvar_log.npy")
 
 
-        loss_log = np.load(loss_log_ckpt).tolist()
+        #loss_log = np.load(loss_log_ckpt).tolist()
         #mu_log = np.load(mu_log_ckpt).tolist()
         #logvar_log = np.load(logvar_log_ckpt).tolist()
 
