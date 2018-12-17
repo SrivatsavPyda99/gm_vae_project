@@ -161,7 +161,7 @@ def main(checkpoint, gen_capacity, disc_capacity, training_size, batch_size):
     root = "~/Data/MNIST"
     save_dir = "../checkpoints/dc_gen_{}_disc_{}".format(num_hidden_gen,num_hidden_disc)
     num_gen = 10 # number of samples to generate at save intervals
-    gen_steps = 2  # number of generator updates per discriminator update
+    gen_steps = 5  # number of generator updates per discriminator update
 
 
     if not os.path.exists(save_dir):
