@@ -20,7 +20,6 @@ max_iterations = 1000000
 lr = 0.0002
 betas = (0.5, 0.999)
 print_interval = 100
-save_interval = 100
 probability_interval=100
 num_hidden= 64
 latent_dim = 100
@@ -116,6 +115,7 @@ def main(args):
     gpu_is_available = False
     if args.gpu > 0:
         gpu_is_available = True
+    save_interval = args.save_interval
         
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
@@ -238,5 +238,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", "-c", type=int, default=0)
     parser.add_argument("--gpu", "-g", type=int, default=0)
+    parser.add_argument("--save_interval", "s", type=int, default=10000)
     args = parser.parse_args()
     main(args)
