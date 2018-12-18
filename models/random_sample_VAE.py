@@ -21,6 +21,7 @@ X = np.zeros((1024, 784))
 
 for i in range(8):
     inp = Variable(Z[i * 128: (i +1) * 128,:,:,:])
+    print(inp.type())
     out = vae.decoder(inp)
     out = out.view(-1, 784)
     X[i * 128: (i +1) * 128,:] = out.data.cpu().numpy().squeeze()
