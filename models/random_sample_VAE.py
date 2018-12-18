@@ -15,12 +15,12 @@ vae = VAE(64, 100, True)
 vae.load_state_dict(torch.load("../checkpoints/conv_vae_64/checkpoint_800000/vae_ckpt_800000.pkl"))
 
 Z = np.load("../tests/z_codes.npy")
-Z = torch.tensor(Z).cuda()
+Z = torch.tensor(Z[:,:,np.newaxis,np.newaxis]).cuda()
 
 X = np.zeros((1024, 784))
 
 for i in range(8):
-    inp = Variable(Z[i * 128: (i +1) * 128,:])
+    inp = Variable(Z[i * 128: (i +1) * 128,:,:,:])
     out = vae.decoder(inp)
     out = out.view(-1, 784)
     X[i * 128: (i +1) * 128,:] = out.data.cpu().numpy().squeeze()
