@@ -15,7 +15,7 @@ vae = VAE(64, 100, True)
 vae.load_state_dict(torch.load("../checkpoints/conv_vae_64/checkpoint_800000/vae_ckpt_800000.pkl"))
 
 Z = np.load("../tests/z_codes.npy")
-Z = torch.Tensor(Z[:,:,np.newaxis,np.newaxis]).cuda()
+Z = torch.FloatTensor(Z[:,:,np.newaxis,np.newaxis]).cuda()
 
 X = np.zeros((1024, 784))
 
