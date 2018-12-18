@@ -11,7 +11,7 @@ import argparse
 from torch.autograd import Variable
 from conv_vae import VAE
 
-vae = VAE(64, 100, True)
+vae = VAE(64, 100, True).cuda()
 vae.load_state_dict(torch.load("../checkpoints/conv_vae_64/checkpoint_800000/vae_ckpt_800000.pkl"))
 
 Z = np.load("../tests/z_codes.npy")
