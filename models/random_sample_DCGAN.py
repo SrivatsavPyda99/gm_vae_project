@@ -12,7 +12,7 @@ from torch.autograd import Variable
 from dcgan_gpu import Generator
 
 G = Generator(64).cuda()
-G = torch.load_state_dict(torch.load("../../ul-gans-project/Pyda/checkpoints/dc_gen_64_disc_64/checkpoint_30000/generator_ckpt_30000.pkl"))
+G.load_state_dict(torch.load("../../ul-gans-project/Pyda/checkpoints/dc_gen_64_disc_64/checkpoint_30000/generator_ckpt_30000.pkl"))
 
 X = np.zeros((1024, 784))
 def sample_z(m=128, k=100):
