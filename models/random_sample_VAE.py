@@ -9,7 +9,7 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 from torch.autograd import Variable
-from conv_vae import VAEE
+from conv_vae import VAE
 
 vae = VAE(64, 100, True)
 vae.load_state_dict(torch.load("../checkpoints/conv_vae_64/checkpoint_800000/vae_ckpt_800000.pkl"))
